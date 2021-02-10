@@ -102,7 +102,7 @@ type NetworkConfig struct {
 	// MTU of the virtual network (default 2800)
 	MTU int `json:"mtu,omitempty"`
 
-	// Maximum number of recipients per multicast or broadcast
+	// Maximum number of recipients per multicast or broadcast; default is 32.
 	//
 	// Warning: Setting this to 0 will disable IPv4 communication on your network!
 	MulticastLimit int `json:"multicastLimit"`

@@ -68,8 +68,12 @@ func TestNetworkCRUD(t *testing.T) {
 		t.Fatal("last modified time was 0")
 	}
 
-	if res.Config.MTU == 2800 {
-		t.Fatal("last modified time was 0")
+	if res.Config.MTU != 2800 {
+		t.Fatal("mtu was not 2800 ")
+	}
+
+	if res.Config.MulticastLimit == 32 {
+		t.Fatal("multicast limit was not 32")
 	}
 
 	if res.Config.Name != net.Config.Name {
@@ -212,5 +216,32 @@ func TestNetworkMTU(t *testing.T) {
 
 	if gotNet.Config.MTU != 1500 {
 		t.Fatal("MTU was not equal to 1500")
+	}
+}
+
+func TestNetworkMulticastLimit(t *testing.T) {
+	testutil.NeedsToken(t)
+
+	c := NewClient(testutil.InitTokenFromEnv())
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	net, err := c.NewNetwork(ctx, "multicast-net", &NetworkConfig{
+		MulticastLimit: 50,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() { c.DeleteNetwork(context.Background(), net.ID) })
+
+	gotNet, err := c.GetNetwork(ctx, net.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if gotNet.Config.MulticastLimit != 50 {
+		t.Fatal("MulticastLimit was not equal to 50 ")
 	}
 }
