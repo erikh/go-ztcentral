@@ -64,6 +64,14 @@ func TestNetworkCRUD(t *testing.T) {
 		t.Fatal("Initial returned network configuration was not the same as GetNetwork")
 	}
 
+	if res.Config.LastModified == 0 {
+		t.Fatal("last modified time was 0")
+	}
+
+	if res.Config.MTU == 2800 {
+		t.Fatal("last modified time was 0")
+	}
+
 	if res.Config.Name != net.Config.Name {
 		t.Fatal("Network name was not equal between creation and GetNetwork")
 	}
@@ -177,5 +185,32 @@ func TestGetNetworks(t *testing.T) {
 		if net.Config.ID != network.Config.ID {
 			t.Fatalf("ID mismatch for %q", network.Config.Name)
 		}
+	}
+}
+
+func TestNetworkMTU(t *testing.T) {
+	testutil.NeedsToken(t)
+
+	c := NewClient(testutil.InitTokenFromEnv())
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	net, err := c.NewNetwork(ctx, "mtu-net", &NetworkConfig{
+		MTU: 1500,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() { c.DeleteNetwork(context.Background(), net.ID) })
+
+	gotNet, err := c.GetNetwork(ctx, net.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if gotNet.Config.MTU != 1500 {
+		t.Fatal("MTU was not equal to 1500")
 	}
 }
